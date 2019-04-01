@@ -35,7 +35,7 @@ public class DiffServiceImpl implements DiffEngine {
 
         //newly created object
         if (original == null && modified != null) {
-            Map<String, String> objectData = getObjectData(modified, diff);
+            Map<String, Object> objectData = getObjectData(modified, diff);
             diff.setCreatedInformation(objectData);
         }
 
@@ -52,8 +52,8 @@ public class DiffServiceImpl implements DiffEngine {
         return diff;
     }
 
-    private <T extends Serializable> Map<String, String> getObjectData(Object object, Diff<T> diff) throws DiffException {
-        Map<String, String> objectInfoMap = new LinkedHashMap<>();
+    private <T extends Serializable> Map<String, Object> getObjectData(Object object, Diff<T> diff) throws DiffException {
+        Map<String, Object> objectInfoMap = new LinkedHashMap<>();
         for (Field field : object.getClass().getDeclaredFields()) {
             try {
 
@@ -63,10 +63,10 @@ public class DiffServiceImpl implements DiffEngine {
                     Object value = field.get(object);
                     //check the declaring class type of var and if it's a class declared in our package then it will need to use it's own Diff
                     if (field.getType().getTypeName().contains("com.perago") && value != null) {
-                        Map<String, String> objectData = getObjectData(field.get(object), diff);
+                        Map<String, Object> objectData = getObjectData(field.get(object), diff);
                         Diff<T> subDiff = new Diff<>();
                         subDiff.setCreatedInformation(objectData);
-                        diff.setSubDiff(subDiff);
+                        objectInfoMap.put(field.getName(), subDiff);
                     } else {                        
                         objectInfoMap.put(field.getName(), value == null ? null : String.valueOf(value));
                     }

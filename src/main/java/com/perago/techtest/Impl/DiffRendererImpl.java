@@ -29,7 +29,7 @@ public class DiffRendererImpl implements DiffRenderer {
 
     private void populateBuilder(int level, int operationPosition, StringBuilder stringBuilder, Diff<?> diff) {
 
-        Map<String, String> createdInformation = diff.getCreatedInformation();
+        Map<String, Object> createdInformation = diff.getCreatedInformation();
         Boolean deletedInformation = diff.getDeletedInformation();
         Map<String, LinkedList> updatedInformation = diff.getUpdatedInformation();
 
@@ -38,13 +38,19 @@ public class DiffRendererImpl implements DiffRenderer {
             String numberItem;
 
             stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
-            for (Map.Entry<String, String> entry : createdInformation.entrySet()) {
+            for (Map.Entry<String, Object> entry : createdInformation.entrySet()) {
                 Object value = entry.getValue();
                 numberItem = level + "." + ++operationPosition;
-                if (value != null) {
-                    stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append("\"").append(entry.getValue()).append("\"").append("\n");
+                //recurse down the children
+                if (value instanceof Diff) {
+                    //we will retain position of rendering the diff
+                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
                 } else {
-                    stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append(entry.getValue()).append("\n");
+                    if (value != null) {
+                        stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append("\"").append(entry.getValue()).append("\"").append("\n");
+                    } else {
+                        stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append(entry.getValue()).append("\n");
+                    }
                 }
 
             }
@@ -59,11 +65,6 @@ public class DiffRendererImpl implements DiffRenderer {
 
         if (updatedInformation != null && !updatedInformation.isEmpty()) {
 
-        }
-
-        //recurse down the children
-        if (diff.getSubDiff() != null) {
-            populateBuilder(++level, ++operationPosition, stringBuilder, diff.getSubDiff());
         }
 
     }
