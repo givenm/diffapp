@@ -11,6 +11,7 @@ import com.perago.techtest.DiffException;
 import com.perago.techtest.DiffRenderer;
 import com.perago.techtest.Impl.DiffRendererImpl;
 import com.perago.techtest.Impl.DiffServiceImpl;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,12 +42,11 @@ public class DiffServiceTests {
         modifiedPerson.setFirstName("Fred");
         modifiedPerson.setSurname("Smith");
 
-        Pet pet = new Pet();
-        pet.setName("Clepard");
-        pet.setType("Cat");
-
-        modifiedPerson.setPet(pet);
-
+//        Pet pet = new Pet();
+//        pet.setName("Clepard");
+//        pet.setType("Cat");
+//
+//        modifiedPerson.setPet(pet);
         Diff<Person> personDiff = diffEngine.calculate(null, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
@@ -77,6 +77,28 @@ public class DiffServiceTests {
 
         System.out.println(renderResult);
 
+    }
+
+    @Test
+    public void clonePersonAndUpdateClone_ShowAsUpdated() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+        
+        
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        modifiedPerson.setSurname("Jones");
+        
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
+
+        System.out.println(renderResult);
     }
 
 }

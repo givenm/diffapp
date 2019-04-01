@@ -14,7 +14,7 @@ import java.util.Map;
 public class Diff<T extends Serializable> {
 
     private Map<String, Object> createdInformation;
-    private Map<String, LinkedList> updatedInformation;
+    private Map<String, Object> updatedInformation;
     private Boolean deletedInformation;
 
     public Diff() {
@@ -28,11 +28,11 @@ public class Diff<T extends Serializable> {
         this.createdInformation = createdInformation;
     }
 
-    public Map<String, LinkedList> getUpdatedInformation() {
+    public Map<String, Object> getUpdatedInformation() {
         return updatedInformation;
     }
 
-    public void setUpdatedInformation(Map<String, LinkedList> updatedInformation) {
+    public void setUpdatedInformation(Map<String, Object> updatedInformation) {
         this.updatedInformation = updatedInformation;
     }
 

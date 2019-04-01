@@ -5,6 +5,7 @@
  */
 package com.perago.techtest.Impl;
 
+import com.perago.techtest.ChangedInfo;
 import com.perago.techtest.Diff;
 import com.perago.techtest.DiffException;
 import com.perago.techtest.DiffRenderer;
@@ -31,7 +32,7 @@ public class DiffRendererImpl implements DiffRenderer {
 
         Map<String, Object> createdInformation = diff.getCreatedInformation();
         Boolean deletedInformation = diff.getDeletedInformation();
-        Map<String, LinkedList> updatedInformation = diff.getUpdatedInformation();
+        Map<String, Object> updatedInformation = diff.getUpdatedInformation();
 
         if (createdInformation != null && !createdInformation.isEmpty()) {
             String prefix = "Create: ";
@@ -47,9 +48,14 @@ public class DiffRendererImpl implements DiffRenderer {
                     populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
                 } else {
                     if (value != null) {
-                        stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append("\"").append(entry.getValue()).append("\"").append("\n");
+                        stringBuilder
+                                .append(numberItem).append(" ").append(prefix).append(entry.getKey())
+                                .append(" as ").append("\"").append(entry.getValue()).append("\"")
+                                .append("\n");
                     } else {
-                        stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append(entry.getValue()).append("\n");
+                        stringBuilder
+                                .append(numberItem).append(" ").append(prefix).append(entry.getKey())
+                                .append(" as ").append(entry.getValue()).append("\n");
                     }
                 }
 
@@ -64,7 +70,34 @@ public class DiffRendererImpl implements DiffRenderer {
         }
 
         if (updatedInformation != null && !updatedInformation.isEmpty()) {
+            String prefix = "Updated: ";
+            String numberItem;
 
+            stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            for (Map.Entry<String, Object> entry : updatedInformation.entrySet()) {
+                Object value = entry.getValue();
+                numberItem = level + "." + ++operationPosition;
+                //recurse down the children
+                if (value instanceof Diff) {
+                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
+                } else if (value instanceof ChangedInfo) {
+                    ChangedInfo changedInfo = (ChangedInfo) value;
+                    if (changedInfo.getTo() != null) {
+                        stringBuilder
+                                .append(numberItem).append(" ").append(prefix).append(entry.getKey())
+                                .append(" from ").append("\"").append(changedInfo.getFrom()).append("\"")
+                                .append(" to ").append("\"").append(changedInfo.getTo()).append("\"")
+                                .append("\n");
+                    } else {
+                        stringBuilder
+                                .append(numberItem).append(" ").append(prefix).append(entry.getKey())
+                                .append(" from ").append("\"").append(changedInfo.getFrom()).append("\"")
+                                .append(" to ").append(changedInfo.getTo())
+                                .append("\n");
+                    }
+                }
+
+            }
         }
 
     }
