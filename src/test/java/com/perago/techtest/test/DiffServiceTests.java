@@ -40,6 +40,13 @@ public class DiffServiceTests {
         Person modifiedPerson = new Person();
         modifiedPerson.setFirstName("Fred");
         modifiedPerson.setSurname("Smith");
+
+        Pet pet = new Pet();
+        pet.setName("Clepard");
+        pet.setType("Cat");
+
+        modifiedPerson.setPet(pet);
+
         Diff<Person> personDiff = diffEngine.calculate(null, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
@@ -64,11 +71,12 @@ public class DiffServiceTests {
         assertTrue(personDiff.getDeletedInformation());
         assertNull(personDiff.getUpdatedInformation());
         assertNull(personDiff.getCreatedInformation());
-        
+
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
 
         System.out.println(renderResult);
-        
+
     }
+
 }

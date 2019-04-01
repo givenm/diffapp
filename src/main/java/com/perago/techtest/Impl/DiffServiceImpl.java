@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,51 +35,48 @@ public class DiffServiceImpl implements DiffEngine {
 
         //newly created object
         if (original == null && modified != null) {
-            Map<String, String> objectData = getObjectData(modified);
+            Map<String, String> objectData = getObjectData(modified, diff);
             diff.setCreatedInformation(objectData);
         }
-        
+
         //deleted object
-        if(original != null && modified == null){
+        if (original != null && modified == null) {
             diff.setDeletedInformation(Boolean.TRUE);
         }
-        
+
+        //Updated object
+        if (original != null && modified != null && !original.equals(modified)) {
+
+        }
+
         return diff;
     }
 
-    private <T extends Serializable> Map<String, String> getObjectData(T object) throws DiffException {
-        Map<String, String> objectInfoMap = new HashMap<>();
-        for (Field f : object.getClass().getDeclaredFields()) {
+    private <T extends Serializable> Map<String, String> getObjectData(Object object, Diff<T> diff) throws DiffException {
+        Map<String, String> objectInfoMap = new LinkedHashMap<>();
+        for (Field field : object.getClass().getDeclaredFields()) {
             try {
 
-                if (!"serialVersionUID".equalsIgnoreCase(f.getName())) {
-                    Object value = executGetter(f, object);
-                    objectInfoMap.put(f.getName(), value == null ? null : String.valueOf(value));
+                if (!"serialVersionUID".equalsIgnoreCase(field.getName())) {
+                    field.setAccessible(true);
+
+                    Object value = field.get(object);
+                    //check the declaring class type of var and if it's a class declared in our package then it will need to use it's own Diff
+                    if (field.getType().getTypeName().contains("com.perago") && value != null) {
+                        Map<String, String> objectData = getObjectData(field.get(object), diff);
+                        Diff<T> subDiff = new Diff<>();
+                        subDiff.setCreatedInformation(objectData);
+                        diff.setSubDiff(subDiff);
+                    } else {                        
+                        objectInfoMap.put(field.getName(), value == null ? null : String.valueOf(value));
+                    }
                 }
-            } catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
                 Logger.getLogger(DiffServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
                 throw new DiffException(ex.getLocalizedMessage());
             }
         }
         return objectInfoMap;
-    }
-
-    public <T extends Serializable> Object executGetter(Field field, T o) throws DiffException {
-        // find the correct method
-        for (Method method : o.getClass().getMethods()) {
-            if ((method.getName().startsWith("get")) && (method.getName().length() == (field.getName().length() + 3))) {
-                if (method.getName().toLowerCase().endsWith(field.getName().toLowerCase())) {
-                    // method found, execut it
-                    try {
-                        return method.invoke(o);
-                    } catch (IllegalAccessException | InvocationTargetException ex) {
-                        throw new DiffException(ex.getLocalizedMessage());
-                    }
-
-                }
-            }
-        }
-        return null;
     }
 
 }

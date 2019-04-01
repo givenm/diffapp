@@ -17,43 +17,55 @@ import java.util.Map;
  */
 public class DiffRendererImpl implements DiffRenderer {
 
+    @Override
     public String render(Diff<?> diff) throws DiffException {
         if (diff == null) {
             throw new DiffException("Diff must must not be null");
         }
+        StringBuilder stringBuilder = new StringBuilder();
+        populateBuilder(0, 0, stringBuilder, diff);
+        return stringBuilder.toString();
+    }
+
+    private void populateBuilder(int level, int operationPosition, StringBuilder stringBuilder, Diff<?> diff) {
+
         Map<String, String> createdInformation = diff.getCreatedInformation();
         Boolean deletedInformation = diff.getDeletedInformation();
         Map<String, LinkedList> updatedInformation = diff.getUpdatedInformation();
-        StringBuilder stringBuilder = new StringBuilder();
+
         if (createdInformation != null && !createdInformation.isEmpty()) {
             String prefix = "Create: ";
-            int major = 1;
-            int minor = 0;
-            stringBuilder.append(major).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            String numberItem;
+
+            stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
             for (Map.Entry<String, String> entry : createdInformation.entrySet()) {
-                String value = entry.getValue();
+                Object value = entry.getValue();
+                numberItem = level + "." + ++operationPosition;
                 if (value != null) {
-                    stringBuilder.append(major).append(".").append(++minor).append(" ").append(prefix).append(entry.getKey()).append(" as ").append("\"").append(entry.getValue()).append("\"").append("\n");
+                    stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append("\"").append(entry.getValue()).append("\"").append("\n");
                 } else {
-                    stringBuilder.append(major).append(".").append(++minor).append(" ").append(prefix).append(entry.getKey()).append(" as ").append(entry.getValue()).append("\n");
+                    stringBuilder.append(numberItem).append(" ").append(prefix).append(entry.getKey()).append(" as ").append(entry.getValue()).append("\n");
                 }
+
             }
 
-            return stringBuilder.toString();
         }
 
         if (deletedInformation != null && deletedInformation) {
             String prefix = "Delete: ";
             int major = 1;
             stringBuilder.append(major).append(".").append(" ").append(prefix).append("Class Name").append("\n");
-            return stringBuilder.toString();
         }
 
         if (updatedInformation != null && !updatedInformation.isEmpty()) {
 
         }
 
-        return stringBuilder.toString();
+        //recurse down the children
+        if (diff.getSubDiff() != null) {
+            populateBuilder(++level, ++operationPosition, stringBuilder, diff.getSubDiff());
+        }
+
     }
 
 }
