@@ -84,11 +84,34 @@ public class DiffServiceTests {
         Person originalPerson = new Person();
         originalPerson.setFirstName("Fred");
         originalPerson.setSurname("Smith");
-        
-        
+
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
         modifiedPerson.setSurname("Jones");
-        
+
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
+
+        System.out.println(renderResult);
+    }
+
+    @Test
+    public void clonePersonAndUpdateCloneWithInnerPerson_ShowAsUpdatedAndCreated() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        Person firendPerson = new Person();
+        firendPerson.setFirstName("Tom");
+        firendPerson.setSurname("Brown");
+        modifiedPerson.setFriend(firendPerson);
+
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());

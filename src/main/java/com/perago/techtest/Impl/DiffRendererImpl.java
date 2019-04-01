@@ -70,7 +70,7 @@ public class DiffRendererImpl implements DiffRenderer {
         }
 
         if (updatedInformation != null && !updatedInformation.isEmpty()) {
-            String prefix = "Updated: ";
+            String prefix = "Update: ";
             String numberItem;
 
             stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
@@ -79,6 +79,9 @@ public class DiffRendererImpl implements DiffRenderer {
                 numberItem = level + "." + ++operationPosition;
                 //recurse down the children
                 if (value instanceof Diff) {
+                    stringBuilder
+                            .append(numberItem).append(" ").append(prefix).append(entry.getKey())
+                            .append("\n");
                     populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
                 } else if (value instanceof ChangedInfo) {
                     ChangedInfo changedInfo = (ChangedInfo) value;
