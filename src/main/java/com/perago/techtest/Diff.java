@@ -17,6 +17,7 @@ public class Diff<T extends Serializable> {
     private Map<String, Object> updatedInformation;
     private String deletedInformation;
     private String className;
+    private String classNameWithPackage;
 
     public Diff() {
     }
@@ -51,6 +52,14 @@ public class Diff<T extends Serializable> {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getClassNameWithPackage() {
+        return classNameWithPackage;
+    }
+
+    public void setClassNameWithPackage(String classNameWithPackage) {
+        this.classNameWithPackage = classNameWithPackage;
     }
 
 }

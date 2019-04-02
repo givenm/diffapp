@@ -13,11 +13,10 @@ import com.perago.techtest.DiffException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -33,6 +32,11 @@ public class DiffServiceImpl implements DiffEngine {
             return null;
         }
 
+        return recreateModifiedObject(original, diff);
+    }
+
+    private <T extends Object & Serializable> T recreateModifiedObject(T original, Diff<?> diff) throws DiffException {
+
         //reverse engineer fron delete Map
         if (diff.getDeletedInformation() != null) {
             //probably unnessesary check
@@ -41,14 +45,36 @@ public class DiffServiceImpl implements DiffEngine {
                 return null;
             }
         }
-        
+
         if (diff.getUpdatedInformation() != null) {
-            
+            T originalClone = SerializationUtils.clone(original);
+            for (Map.Entry<String, Object> entry : diff.getUpdatedInformation().entrySet()) {
+                try {
+
+                    String fieldName = entry.getKey();
+                    Field field = originalClone.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    Object value = entry.getValue();
+                    if (value != null && value instanceof Diff) {
+                        Diff<?> subDiff = (Diff<?>) value;
+                        //we are drilling down to the child object and originalclone becomes child object in recursion
+                        T childObject = recreateModifiedObject( (T) field.get(originalClone), subDiff);
+                        field.set(originalClone, childObject);
+                    } else if (value != null && value instanceof ChangedInfo) {
+                        ChangedInfo changedInfo = (ChangedInfo) value;
+                        field.set(originalClone, changedInfo.getTo());
+                    }
+                } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                    Logger.getLogger(DiffServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new DiffException(ex.getLocalizedMessage());
+                }
+            }
+
+            return originalClone;
         }
         
-        
-
         return null;
+
     }
 
     @Override
