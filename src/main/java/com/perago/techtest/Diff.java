@@ -2,7 +2,6 @@ package com.perago.techtest;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The object representing a diff. Diffs must reflect all information that was
@@ -17,7 +16,7 @@ public class Diff<T extends Serializable> {
     private Map<String, Object> updatedInformation;
     private String deletedInformation;
     private String className;
-    private String classNameWithPackage;
+    private Class<?> classInContext;
 
     public Diff() {
     }
@@ -54,12 +53,12 @@ public class Diff<T extends Serializable> {
         this.className = className;
     }
 
-    public String getClassNameWithPackage() {
-        return classNameWithPackage;
+    public Class<?> getClassInContext() {
+        return classInContext;
     }
 
-    public void setClassNameWithPackage(String classNameWithPackage) {
-        this.classNameWithPackage = classNameWithPackage;
+    public void setClassInContext(Class<?> classInContext) {
+        this.classInContext = classInContext;
     }
 
 }

@@ -138,7 +138,7 @@ public class DiffServiceTests {
         //original pet
         Pet pet = new Pet();
         pet.setName("Rover");
-        pet.setType("Spot");
+        pet.setType("Dog");
 
         originalPerson.setPet(pet);
 
@@ -151,8 +151,8 @@ public class DiffServiceTests {
 
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
         modifiedPerson.setSurname("Jones");
-        Person modifiedfriendPerson = modifiedPerson.getFriend();
-        modifiedfriendPerson.setFirstName("Jim");
+        Person modifiedFriendPerson = modifiedPerson.getFriend();
+        modifiedFriendPerson.setFirstName("Jim");
 
         Pet modifiedPet = modifiedPerson.getPet();
         modifiedPet.setName("Spot");
@@ -165,6 +165,10 @@ public class DiffServiceTests {
 
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
+
+        Person modifiedPersonDiffApplied = diffEngine.apply(originalPerson, personDiff);
+        assertEquals(modifiedPersonDiffApplied, modifiedPerson);
+
         System.out.println(renderResult);
     }
 
@@ -182,8 +186,8 @@ public class DiffServiceTests {
         originalPerson.setFriend(originalFriendPerson);
 
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
-        Person modifiedfriendPerson = modifiedPerson.getFriend();
-        modifiedfriendPerson.setFirstName("Jim");
+        Person modifiedFriendPerson = modifiedPerson.getFriend();
+        modifiedFriendPerson.setFirstName("Jim");
 
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
@@ -193,6 +197,10 @@ public class DiffServiceTests {
 
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
+        
+        Person modifiedPersonDiffApplied = diffEngine.apply(originalPerson, personDiff);
+        assertEquals(modifiedPersonDiffApplied, modifiedPerson);
+        
         System.out.println(renderResult);
     }
 
@@ -221,6 +229,10 @@ public class DiffServiceTests {
 
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
+        
+        Person modifiedPersonDiffApplied = diffEngine.apply(originalPerson, personDiff);
+        assertEquals(modifiedPersonDiffApplied, modifiedPerson);
+        
         System.out.println(renderResult);
     }
 
@@ -250,6 +262,11 @@ public class DiffServiceTests {
 
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
+        
+        Person modifiedPersonDiffApplied = diffEngine.apply(originalPerson, personDiff);
+        assertEquals(modifiedPersonDiffApplied, modifiedPerson);
+        
+        
         System.out.println(renderResult);
     }
 

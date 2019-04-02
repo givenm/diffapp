@@ -36,21 +36,20 @@ public class DiffServiceImpl implements DiffEngine {
     }
 
     private <T extends Object & Serializable> T recreateModifiedObject(T original, Diff<?> diff) throws DiffException {
-
+        T originalClone = null;
         //reverse engineer fron delete Map
         if (diff.getDeletedInformation() != null) {
             //probably unnessesary check
             if (diff.getDeletedInformation().endsWith(Constants.DELETED_ROOT)) {
                 //this means the modifiction had deleted the root object
-                return null;
+                originalClone = null;
             }
         }
 
         if (diff.getUpdatedInformation() != null) {
-            T originalClone = SerializationUtils.clone(original);
+            originalClone = SerializationUtils.clone(original);
             for (Map.Entry<String, Object> entry : diff.getUpdatedInformation().entrySet()) {
                 try {
-
                     String fieldName = entry.getKey();
                     Field field = originalClone.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
@@ -58,7 +57,7 @@ public class DiffServiceImpl implements DiffEngine {
                     if (value != null && value instanceof Diff) {
                         Diff<?> subDiff = (Diff<?>) value;
                         //we are drilling down to the child object and originalclone becomes child object in recursion
-                        T childObject = recreateModifiedObject( (T) field.get(originalClone), subDiff);
+                        T childObject = recreateModifiedObject((T) field.get(originalClone), subDiff);
                         field.set(originalClone, childObject);
                     } else if (value != null && value instanceof ChangedInfo) {
                         ChangedInfo changedInfo = (ChangedInfo) value;
@@ -69,11 +68,27 @@ public class DiffServiceImpl implements DiffEngine {
                     throw new DiffException(ex.getLocalizedMessage());
                 }
             }
-
-            return originalClone;
         }
-        
-        return null;
+
+        if (diff.getCreatedInformation() != null) {
+            Object newCreatedObject;
+            try {
+                newCreatedObject = diff.getClassInContext().newInstance();
+                for (Map.Entry<String, Object> entry : diff.getCreatedInformation().entrySet()) {
+
+                    String fieldName = entry.getKey();
+                    Field field = newCreatedObject.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    field.set(newCreatedObject, entry.getValue());
+                }
+                originalClone = (T) newCreatedObject;
+            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
+                Logger.getLogger(DiffServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                throw new DiffException(ex.getLocalizedMessage());
+            }
+        }
+
+        return originalClone;
 
     }
 
@@ -184,6 +199,7 @@ public class DiffServiceImpl implements DiffEngine {
         Diff<T> subDiff = new Diff<>();
         subDiff.setCreatedInformation(objectData);
         subDiff.setClassName(modifiedValue.getClass().getSimpleName());
+        subDiff.setClassInContext(modifiedValue.getClass());
         return subDiff;
     }
 
