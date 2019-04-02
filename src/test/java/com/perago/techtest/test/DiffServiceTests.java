@@ -65,12 +65,15 @@ public class DiffServiceTests {
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, null);
         assertNotNull(personDiff);
         assertNotNull(personDiff.getDeletedInformation());
-        assertTrue(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getDeletedInformation());
         assertNull(personDiff.getUpdatedInformation());
         assertNull(personDiff.getCreatedInformation());
 
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
+        
+        Person personDiffApplied = diffEngine.apply(originalPerson, personDiff);
+        assertNull(personDiffApplied);
 
         System.out.println(renderResult);
 
@@ -111,7 +114,7 @@ public class DiffServiceTests {
 
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
-        assertNull(personDiff.getDeletedInformation());
+        assertNull(personDiff.getDeletedInformation()); 
         assertNotNull(personDiff.getUpdatedInformation());
         assertNull(personDiff.getCreatedInformation());
 

@@ -6,14 +6,16 @@
 package com.perago.techtest.Impl;
 
 import com.perago.techtest.ChangedInfo;
+import com.perago.techtest.Constants;
 import com.perago.techtest.Diff;
 import com.perago.techtest.DiffEngine;
 import com.perago.techtest.DiffException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,27 @@ public class DiffServiceImpl implements DiffEngine {
 
     @Override
     public <T extends Serializable> T apply(T original, Diff<?> diff) throws DiffException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        if (diff == null || (diff.getDeletedInformation() == null && diff.getCreatedInformation() == null && diff.getUpdatedInformation() == null)) {
+            return null;
+        }
+
+        //reverse engineer fron delete Map
+        if (diff.getDeletedInformation() != null) {
+            //probably unnessesary check
+            if (diff.getDeletedInformation().endsWith(Constants.DELETED_ROOT)) {
+                //this means the modifiction had deleted the root object
+                return null;
+            }
+        }
+        
+        if (diff.getUpdatedInformation() != null) {
+            
+        }
+        
+        
+
+        return null;
     }
 
     @Override
@@ -43,7 +65,7 @@ public class DiffServiceImpl implements DiffEngine {
 
         //deleted object
         if (original != null && modified == null) {
-            diff.setDeletedInformation(Boolean.TRUE);
+            diff.setDeletedInformation(Constants.DELETED_ROOT);
             diff.setClassName(original.getClass().getSimpleName());
         }
 
@@ -113,7 +135,7 @@ public class DiffServiceImpl implements DiffEngine {
                         updatedInformationMap.put(field.getName(), subDiff);
                     } else if (field.getType().getTypeName().contains("com.perago") && originalValue != null && modifiedValue == null) {
                         Diff<T> subDiff = new Diff<>();
-                        subDiff.setDeletedInformation(Boolean.TRUE);
+                        subDiff.setDeletedInformation(field.getName());
                         updatedInformationMap.put(field.getName(), subDiff);
                         subDiff.setClassName(originalValue.getClass().getSimpleName());
                     } else if (!StringUtils.equals(String.valueOf(originalValue), String.valueOf(modifiedValue))) {

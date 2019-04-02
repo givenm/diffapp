@@ -1,8 +1,8 @@
 package com.perago.techtest;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The object representing a diff. Diffs must reflect all information that was
@@ -15,7 +15,7 @@ public class Diff<T extends Serializable> {
 
     private Map<String, Object> createdInformation;
     private Map<String, Object> updatedInformation;
-    private Boolean deletedInformation;
+    private String deletedInformation;
     private String className;
 
     public Diff() {
@@ -37,11 +37,11 @@ public class Diff<T extends Serializable> {
         this.updatedInformation = updatedInformation;
     }
 
-    public Boolean getDeletedInformation() {
+    public String getDeletedInformation() {
         return deletedInformation;
     }
 
-    public void setDeletedInformation(Boolean deletedInformation) {
+    public void setDeletedInformation(String deletedInformation) {
         this.deletedInformation = deletedInformation;
     }
 
