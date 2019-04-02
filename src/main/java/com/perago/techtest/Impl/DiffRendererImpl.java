@@ -9,7 +9,7 @@ import com.perago.techtest.ChangedInfo;
 import com.perago.techtest.Diff;
 import com.perago.techtest.DiffException;
 import com.perago.techtest.DiffRenderer;
-import java.util.LinkedList;
+import com.perago.techtest.Operations;
 import java.util.Map;
 
 /**
@@ -24,28 +24,29 @@ public class DiffRendererImpl implements DiffRenderer {
             throw new DiffException("Diff must must not be null");
         }
         StringBuilder stringBuilder = new StringBuilder();
-        populateBuilder(0, 0, stringBuilder, diff);
+        populateBuilder(0, 0, stringBuilder, diff, null);
         return stringBuilder.toString();
     }
 
-    private void populateBuilder(int level, int operationPosition, StringBuilder stringBuilder, Diff<?> diff) {
+    private void populateBuilder(int level, int operationPosition, StringBuilder stringBuilder, Diff<?> diff, Operations lastOperation) {
 
         Map<String, Object> createdInformation = diff.getCreatedInformation();
         Boolean deletedInformation = diff.getDeletedInformation();
         Map<String, Object> updatedInformation = diff.getUpdatedInformation();
 
         if (createdInformation != null && !createdInformation.isEmpty()) {
-            String prefix = "Create: ";
+            String prefix = Operations.CREATE.getOperationname();
             String numberItem;
-
-            stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            if (lastOperation != Operations.CREATE || lastOperation == null) {
+                stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            }
             for (Map.Entry<String, Object> entry : createdInformation.entrySet()) {
                 Object value = entry.getValue();
                 numberItem = level + "." + ++operationPosition;
                 //recurse down the children
                 if (value instanceof Diff) {
                     //we will retain position of rendering the diff
-                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
+                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value, Operations.CREATE);
                 } else {
                     if (value != null) {
                         stringBuilder
@@ -64,16 +65,19 @@ public class DiffRendererImpl implements DiffRenderer {
         }
 
         if (deletedInformation != null && deletedInformation) {
-            String prefix = "Delete: ";
+            String prefix = Operations.DELETE.getOperationname();
             int major = 1;
-            stringBuilder.append(major).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            if (lastOperation != Operations.DELETE || lastOperation == null) {
+                stringBuilder.append(major).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            }
         }
 
         if (updatedInformation != null && !updatedInformation.isEmpty()) {
-            String prefix = "Update: ";
+            String prefix = Operations.UPDATE.getOperationname();
             String numberItem;
-
-            stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            if (lastOperation != Operations.UPDATE || lastOperation == null) {
+                stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+            }
             for (Map.Entry<String, Object> entry : updatedInformation.entrySet()) {
                 Object value = entry.getValue();
                 numberItem = level + "." + ++operationPosition;
@@ -82,7 +86,7 @@ public class DiffRendererImpl implements DiffRenderer {
                     stringBuilder
                             .append(numberItem).append(" ").append(prefix).append(entry.getKey())
                             .append("\n");
-                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value);
+                    populateBuilder(++level, ++operationPosition, stringBuilder, (Diff<?>) value, Operations.UPDATE);
                 } else if (value instanceof ChangedInfo) {
                     ChangedInfo changedInfo = (ChangedInfo) value;
                     if (changedInfo.getTo() != null) {

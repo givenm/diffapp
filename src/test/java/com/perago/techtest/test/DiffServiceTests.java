@@ -37,16 +37,11 @@ public class DiffServiceTests {
     }
 
     @Test
-    public void nullOriginalAndNoneNullModified_ShowAsCreated() throws DiffException {
+    public void nullOriginalAndNoneNullModified_ShowAsCreated_Example_1() throws DiffException {
         Person modifiedPerson = new Person();
         modifiedPerson.setFirstName("Fred");
         modifiedPerson.setSurname("Smith");
 
-//        Pet pet = new Pet();
-//        pet.setName("Clepard");
-//        pet.setType("Cat");
-//
-//        modifiedPerson.setPet(pet);
         Diff<Person> personDiff = diffEngine.calculate(null, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
@@ -61,7 +56,7 @@ public class DiffServiceTests {
     }
 
     @Test
-    public void noneNullOriginalAndNullModified_ShowAsDeleted() throws DiffException {
+    public void noneNullOriginalAndNullModified_ShowAsDeleted_Example_2() throws DiffException {
         Person originalPerson = new Person();
         originalPerson.setFirstName("Fred");
         originalPerson.setSurname("Smith");
@@ -80,7 +75,7 @@ public class DiffServiceTests {
     }
 
     @Test
-    public void clonePersonAndUpdateClone_ShowAsUpdated() throws DiffException {
+    public void clonePersonAndUpdateClone_ShowAsUpdated_Example_3() throws DiffException {
         Person originalPerson = new Person();
         originalPerson.setFirstName("Fred");
         originalPerson.setSurname("Smith");
@@ -101,7 +96,7 @@ public class DiffServiceTests {
     }
 
     @Test
-    public void clonePersonAndUpdateCloneWithInnerPerson_ShowAsUpdatedAndCreated() throws DiffException {
+    public void clonePersonAndUpdateCloneWithInnerPerson_ShowAsUpdatedAndCreated_Example_4() throws DiffException {
         Person originalPerson = new Person();
         originalPerson.setFirstName("Fred");
         originalPerson.setSurname("Smith");
@@ -121,6 +116,100 @@ public class DiffServiceTests {
         //Check renderer
         String renderResult = diffRenderer.render(personDiff);
 
+        System.out.println(renderResult);
+    }
+
+    @Test
+    public void clonePersonWithPetAndPersonAndThenUpdateCloneWithInnerPerson_ShowAsUpdatedForAllChildUpdates_Example_5() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+        //original pet
+        Pet pet = new Pet();
+        pet.setName("Rover");
+        pet.setType("Spot");
+
+        originalPerson.setPet(pet);
+
+        // original friend
+        Person originalFriendPerson = new Person();
+        originalFriendPerson.setFirstName("Tom");
+        originalFriendPerson.setSurname("Brown");
+
+        originalPerson.setFriend(originalFriendPerson);
+        
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        modifiedPerson.setSurname("Jones");
+        Person modifiedfriendPerson = modifiedPerson.getFriend();
+        modifiedfriendPerson.setFirstName("Jim");
+        
+        Pet modifiedPet = modifiedPerson.getPet();
+        modifiedPet.setName("Spot");
+        
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
+        System.out.println(renderResult);
+    }
+    
+    @Test
+    public void clonePersonWithNoPetAndWithPersonAndThenUpdateClonePersonWithUpdatedInnerPersonFirstname_ShowAsUpdatedFirstname_Example_6() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+
+        // original friend
+        Person originalFriendPerson = new Person();
+        originalFriendPerson.setFirstName("Tom");
+        originalFriendPerson.setSurname("Brown");
+
+        originalPerson.setFriend(originalFriendPerson);
+        
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        Person modifiedfriendPerson = modifiedPerson.getFriend();
+        modifiedfriendPerson.setFirstName("Jim");
+        
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
+        System.out.println(renderResult);
+    }
+    
+    @Test
+    public void clonePersonWithNoPetAndWithPersonAndThenUpdateClonePersonWithNullFriend_ShowAsUpdatedAndDeletedPerson_Example_7() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+
+        // original friend
+        Person originalFriendPerson = new Person();
+        originalFriendPerson.setFirstName("Tom");
+        originalFriendPerson.setSurname("Brown");
+
+        originalPerson.setFriend(originalFriendPerson);
+        
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        modifiedPerson.setFirstName("John");
+        modifiedPerson.setFriend(null);
+        
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
         System.out.println(renderResult);
     }
 

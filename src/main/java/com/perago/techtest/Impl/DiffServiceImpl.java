@@ -106,6 +106,10 @@ public class DiffServiceImpl implements DiffEngine {
                     } else if (field.getType().getTypeName().contains("com.perago") && originalValue == null && modifiedValue != null) {
                         Diff<T> subDiff = populateCreatedInformationDiff(modifiedValue, diff);
                         updatedInformationMap.put(field.getName(), subDiff);
+                    }else if (field.getType().getTypeName().contains("com.perago") && originalValue != null && modifiedValue == null) {
+                        Diff<T> subDiff = new Diff<>();
+                        subDiff.setDeletedInformation(Boolean.TRUE);
+                        updatedInformationMap.put(field.getName(), subDiff);
                     } else if (!StringUtils.equals(String.valueOf(originalValue), String.valueOf(modifiedValue))) {
                         ChangedInfo changedInfo = new ChangedInfo(originalValue == null ? null : String.valueOf(originalValue), modifiedValue == null ? null : String.valueOf(modifiedValue));
                         updatedInformationMap.put(field.getName(), changedInfo);
