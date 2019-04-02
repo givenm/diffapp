@@ -38,7 +38,7 @@ public class DiffRendererImpl implements DiffRenderer {
             String prefix = Operations.CREATE.getOperationname();
             String numberItem;
             if (lastOperation != Operations.CREATE || lastOperation == null) {
-                stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+                stringBuilder.append(++level).append(".").append(" ").append(prefix).append(diff.getClassName()).append("\n");
             }
             for (Map.Entry<String, Object> entry : createdInformation.entrySet()) {
                 Object value = entry.getValue();
@@ -68,7 +68,7 @@ public class DiffRendererImpl implements DiffRenderer {
             String prefix = Operations.DELETE.getOperationname();
             int major = 1;
             if (lastOperation != Operations.DELETE || lastOperation == null) {
-                stringBuilder.append(major).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+                stringBuilder.append(major).append(".").append(" ").append(prefix).append(diff.getClassName()).append("\n");
             }
         }
 
@@ -76,7 +76,7 @@ public class DiffRendererImpl implements DiffRenderer {
             String prefix = Operations.UPDATE.getOperationname();
             String numberItem;
             if (lastOperation != Operations.UPDATE || lastOperation == null) {
-                stringBuilder.append(++level).append(".").append(" ").append(prefix).append("Class Name").append("\n");
+                stringBuilder.append(++level).append(".").append(" ").append(prefix).append(diff.getClassName()).append("\n");
             }
             for (Map.Entry<String, Object> entry : updatedInformation.entrySet()) {
                 Object value = entry.getValue();

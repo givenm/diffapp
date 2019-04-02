@@ -38,17 +38,20 @@ public class DiffServiceImpl implements DiffEngine {
         if (original == null && modified != null) {
             Map<String, Object> objectData = getObjectData(modified, diff);
             diff.setCreatedInformation(objectData);
+            diff.setClassName(modified.getClass().getSimpleName());
         }
 
         //deleted object
         if (original != null && modified == null) {
             diff.setDeletedInformation(Boolean.TRUE);
+            diff.setClassName(original.getClass().getSimpleName());
         }
 
         //Updated object
         if (original != null && modified != null && !original.equals(modified)) {
             Map<String, Object> updatedInformation = trackUpdatedInfomation(original, modified, diff);
             diff.setUpdatedInformation(updatedInformation);
+            diff.setClassName(original.getClass().getSimpleName());
         }
 
         return diff;
@@ -67,6 +70,7 @@ public class DiffServiceImpl implements DiffEngine {
                     if (field.getType().getTypeName().contains("com.perago") && value != null) {
                         Diff<T> subDiff = populateCreatedInformationDiff(value, diff);
                         objectInfoMap.put(field.getName(), subDiff);
+                        subDiff.setClassName(object.getClass().getSimpleName());
                     } else {
                         objectInfoMap.put(field.getName(), value == null ? null : String.valueOf(value));
                     }
@@ -103,13 +107,15 @@ public class DiffServiceImpl implements DiffEngine {
                         Diff<T> subDiff = new Diff<>();
                         subDiff.setUpdatedInformation(trackedChangesMap);
                         updatedInformationMap.put(field.getName(), subDiff);
+                        subDiff.setClassName(originalValue.getClass().getSimpleName());
                     } else if (field.getType().getTypeName().contains("com.perago") && originalValue == null && modifiedValue != null) {
                         Diff<T> subDiff = populateCreatedInformationDiff(modifiedValue, diff);
                         updatedInformationMap.put(field.getName(), subDiff);
-                    }else if (field.getType().getTypeName().contains("com.perago") && originalValue != null && modifiedValue == null) {
+                    } else if (field.getType().getTypeName().contains("com.perago") && originalValue != null && modifiedValue == null) {
                         Diff<T> subDiff = new Diff<>();
                         subDiff.setDeletedInformation(Boolean.TRUE);
                         updatedInformationMap.put(field.getName(), subDiff);
+                        subDiff.setClassName(originalValue.getClass().getSimpleName());
                     } else if (!StringUtils.equals(String.valueOf(originalValue), String.valueOf(modifiedValue))) {
                         ChangedInfo changedInfo = new ChangedInfo(originalValue == null ? null : String.valueOf(originalValue), modifiedValue == null ? null : String.valueOf(modifiedValue));
                         updatedInformationMap.put(field.getName(), changedInfo);
@@ -129,6 +135,7 @@ public class DiffServiceImpl implements DiffEngine {
         Map<String, Object> objectData = getObjectData(modifiedValue, diff);
         Diff<T> subDiff = new Diff<>();
         subDiff.setCreatedInformation(objectData);
+        subDiff.setClassName(modifiedValue.getClass().getSimpleName());
         return subDiff;
     }
 
