@@ -10,4 +10,4 @@ Reason for not completing: This requirs consideration of how data is store in ea
 •	Cyclic relationships in original or modified should be taken into consideration when calculating and applying diffs
 Reason: Ran out of time to finally implement this but ths is done by using tail recursion.
 
-# Numbering of results needs some more debugging to make it work.
+# Numbering of results needs some more debugging to make it work properly
