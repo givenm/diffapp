@@ -11,6 +11,8 @@ import com.perago.techtest.DiffException;
 import com.perago.techtest.DiffRenderer;
 import com.perago.techtest.Impl.DiffRendererImpl;
 import com.perago.techtest.Impl.DiffServiceImpl;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -137,15 +139,15 @@ public class DiffServiceTests {
         originalFriendPerson.setSurname("Brown");
 
         originalPerson.setFriend(originalFriendPerson);
-        
+
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
         modifiedPerson.setSurname("Jones");
         Person modifiedfriendPerson = modifiedPerson.getFriend();
         modifiedfriendPerson.setFirstName("Jim");
-        
+
         Pet modifiedPet = modifiedPerson.getPet();
         modifiedPet.setName("Spot");
-        
+
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
@@ -156,7 +158,7 @@ public class DiffServiceTests {
         String renderResult = diffRenderer.render(personDiff);
         System.out.println(renderResult);
     }
-    
+
     @Test
     public void clonePersonWithNoPetAndWithPersonAndThenUpdateClonePersonWithUpdatedInnerPersonFirstname_ShowAsUpdatedFirstname_Example_6() throws DiffException {
         Person originalPerson = new Person();
@@ -169,11 +171,11 @@ public class DiffServiceTests {
         originalFriendPerson.setSurname("Brown");
 
         originalPerson.setFriend(originalFriendPerson);
-        
+
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
         Person modifiedfriendPerson = modifiedPerson.getFriend();
         modifiedfriendPerson.setFirstName("Jim");
-        
+
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
@@ -184,7 +186,7 @@ public class DiffServiceTests {
         String renderResult = diffRenderer.render(personDiff);
         System.out.println(renderResult);
     }
-    
+
     @Test
     public void clonePersonWithNoPetAndWithPersonAndThenUpdateClonePersonWithNullFriend_ShowAsUpdatedAndDeletedPerson_Example_7() throws DiffException {
         Person originalPerson = new Person();
@@ -197,11 +199,40 @@ public class DiffServiceTests {
         originalFriendPerson.setSurname("Brown");
 
         originalPerson.setFriend(originalFriendPerson);
-        
+
         Person modifiedPerson = SerializationUtils.clone(originalPerson);
         modifiedPerson.setFirstName("John");
         modifiedPerson.setFriend(null);
-        
+
+        Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
+        assertNotNull(personDiff);
+        assertNull(personDiff.getDeletedInformation());
+        assertNotNull(personDiff.getUpdatedInformation());
+        assertNull(personDiff.getCreatedInformation());
+
+        //Check renderer
+        String renderResult = diffRenderer.render(personDiff);
+        System.out.println(renderResult);
+    }
+
+    @Test
+    public void clonePersonWithNicknamesAndThenUpdateClonePersonNickname_ShowAsUpdated_Example_8() throws DiffException {
+        Person originalPerson = new Person();
+        originalPerson.setFirstName("Fred");
+        originalPerson.setSurname("Smith");
+
+        Set<String> nicknames = new LinkedHashSet<>();
+        nicknames.add("scooter");
+        nicknames.add("biff");
+
+        originalPerson.setNickNames(nicknames);
+
+        Person modifiedPerson = SerializationUtils.clone(originalPerson);
+        Set<String> updatedNicknames = new LinkedHashSet<>();
+        updatedNicknames.add("scooter");
+        updatedNicknames.add("polly");
+        modifiedPerson.setNickNames(updatedNicknames);
+
         Diff<Person> personDiff = diffEngine.calculate(originalPerson, modifiedPerson);
         assertNotNull(personDiff);
         assertNull(personDiff.getDeletedInformation());
