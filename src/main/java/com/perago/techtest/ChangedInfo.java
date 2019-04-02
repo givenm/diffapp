@@ -11,13 +11,14 @@ package com.perago.techtest;
  */
 public class ChangedInfo {
 
+    private Class<?> dataTypeClass;
+    private String from;
+    private String to;
+
     public ChangedInfo(String from, String to) {
         this.from = from;
         this.to = to;
     }
-
-    private String from;
-    private String to;
 
     public String getFrom() {
         return from;
@@ -33,6 +34,14 @@ public class ChangedInfo {
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public Class<?> getDataTypeClass() {
+        return dataTypeClass;
+    }
+
+    public void setDataTypeClass(Class<?> dataTypeClass) {
+        this.dataTypeClass = dataTypeClass;
     }
 
 }

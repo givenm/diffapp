@@ -181,7 +181,9 @@ public class DiffServiceImpl implements DiffEngine {
                         subDiff.setClassName(originalValue.getClass().getSimpleName());
                     } else if (!StringUtils.equals(String.valueOf(originalValue), String.valueOf(modifiedValue))) {
                         ChangedInfo changedInfo = new ChangedInfo(originalValue == null ? null : String.valueOf(originalValue), modifiedValue == null ? null : String.valueOf(modifiedValue));
+                        changedInfo.setDataTypeClass(originalValue.getClass());
                         updatedInformationMap.put(field.getName(), changedInfo);
+                        
                     }
 
                 }
