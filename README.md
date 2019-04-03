@@ -11,3 +11,5 @@ Reason for not completing: This requirs consideration of how data is store in ea
 Reason: Ran out of time to finally implement this but ths is done by using tail recursion.
 
 # Numbering of results needs some more debugging to make it work properly
+
+# more test scenarios would need to be covered which include exceptions handling. Mockito would be useful to stub and throw exceptions etc
